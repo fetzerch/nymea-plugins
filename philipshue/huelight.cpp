@@ -133,21 +133,30 @@ void HueLight::setColorMode(const HueLight::ColorMode &colorMode)
 
 void HueLight::updateStates(const QVariantMap &statesMap)
 {
+    // Power, brightness
+    setPower(statesMap.value("on").toBool());
+    setBrigtness(statesMap.value("bri").toInt());
+
     // color mode
     if (statesMap.value("colormode").toString() == "hs") {
         setColorMode(ColorModeHS);
+        setSat(statesMap.value("sat").toInt());
+        setHue(statesMap.value("hue").toInt());
     } else if (statesMap.value("colormode").toString() == "ct") {
         setColorMode(ColorModeCT);
+        setCt(statesMap.value("ct").toInt());
     } else if (statesMap.value("colormode").toString() == "xy") {
         setColorMode(ColorModeXY);
+        setXy(QPointF(statesMap.value("xy").toList().first().toFloat(), statesMap.value("xy").toList().last().toFloat()));
     }
 
-    // effect (none, colorloop)
+    // effect (none, colorloop), alert
     if (statesMap.value("effect").toString() == "none") {
         setEffect("none");
     } else if (statesMap.value("effect").toString() == "colorloop") {
         setEffect("color loop");
     }
+    setAlert(statesMap.value("alert").toString());
 
     // FIXME: This is a workaround for a bug in the hue bridge:
     // "LIGHTIFY Indoor Flex RGBW" are erroneously reporting "reachable: false" all the time.
@@ -156,16 +165,6 @@ void HueLight::updateStates(const QVariantMap &statesMap)
     } else {
         setReachable(statesMap.value("reachable").toBool());
     }
-
-    // alert (none, select, lselect)
-    setAlert(statesMap.value("alert").toString());
-    setBrigtness(statesMap.value("bri").toInt());
-    setCt(statesMap.value("ct").toInt());
-    setPower(statesMap.value("on").toBool());
-    setSat(statesMap.value("sat").toInt());
-    setHue(statesMap.value("hue").toInt());
-    if (!statesMap.value("xy").toList().isEmpty())
-        setXy(QPointF(statesMap.value("xy").toList().first().toFloat(), statesMap.value("xy").toList().last().toFloat()));
 
     emit stateChanged();
 }
